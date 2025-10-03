@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BetTrack Pro - Sports Betting Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6', // blue-500
+                        secondary: '#10B981', // emerald-500
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="mb-8">
+            <div class="flex justify-between items-center">
+                <h1 class="text-3xl font-bold text-primary">BetTrack Pro 🏆</h1>
+                <div class="flex space-x-4">
+                    <button class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-600 transition">
+                        <i data-feather="plus" class="mr-2"></i>New Bet
+                    </button>
+                    <button class="px-4 py-2 bg-secondary text-white rounded-lg hover:bg-emerald-600 transition">
+                        <i data-feather="filter" class="mr-2"></i>Filter
+                    </button>
+                </div>
+            </div>
+            <p class="text-gray-600 mt-2">Track your sports betting performance with precision</p>
+        </header>
+
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-gray-500 text-sm font-medium">Total Profit/Loss</h3>
+                <p class="text-2xl font-bold mt-1 text-green-500">+$1,245.50</p>
+                <p class="text-sm text-gray-400 mt-1">(+24.3 Units)</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-gray-500 text-sm font-medium">Win Rate</h3>
+                <p class="text-2xl font-bold mt-1 text-primary">58.7%</p>
+                <p class="text-sm text-gray-400 mt-1">(87-61-2)</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-gray-500 text-sm font-medium">ROI</h3>
+                <p class="text-2xl font-bold mt-1 text-secondary">+12.4%</p>
+                <p class="text-sm text-gray-400 mt-1">Last 30 days</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-gray-500 text-sm font-medium">Avg. Odds</h3>
+                <p class="text-2xl font-bold mt-1">+125</p>
+                <p class="text-sm text-gray-400 mt-1">Median: +110</p>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4">Profit/Loss by Month</h3>
+                <canvas id="monthlyChart" height="250"></canvas>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4">Performance by Sport</h3>
+                <canvas id="sportChart" height="250"></canvas>
+            </div>
+        </div>
+
+        <!-- Bet History Table -->
+        <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8 fade-in">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold">Recent Bets</h3>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Game</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Bet</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Odds</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Risk</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Result</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">P/L</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">May 15</td>
+                            <td class="px-6 py-4 whitespace-nowrap">LAL vs DEN</td>
+                            <td class="px-6 py-4 whitespace-nowrap">DEN -4.5</td>
+                            <td class="px-6 py-4 whitespace-nowrap">-110</td>
+                            <td class="px-6 py-4 whitespace-nowrap">2U ($200)</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Win</span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-green-600">+$182</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">May 14</td>
+                            <td class="px-6 py-4 whitespace-nowrap">NYY vs BAL</td>
+                            <td class="px-6 py-4 whitespace-nowrap">NYY ML</td>
+                            <td class="px-6 py-4 whitespace-nowrap">+145</td>
+                            <td class="px-6 py-4 whitespace-nowrap">1U ($100)</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">Loss</span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-red-600">-$100</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">May 13</td>
+                            <td class="px-6 py-4 whitespace-nowrap">BOS vs CLE</td>
+                            <td class="px-6 py-4 whitespace-nowrap">Over 212.5</td>
+                            <td class="px-6 py-4 whitespace-nowrap">-115</td>
+                            <td class="px-6 py-4 whitespace-nowrap">1.5U ($150)</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Win</span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-green-600">+$130</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">May 12</td>
+                            <td class="px-6 py-4 whitespace-nowrap">DAL vs OKC</td>
+                            <td class="px-6 py-4 whitespace-nowrap">Luka Over 32.5 Pts</td>
+                            <td class="px-6 py-4 whitespace-nowrap">-120</td>
+                            <td class="px-6 py-4 whitespace-nowrap">3U ($300)</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">Win</span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-green-600">+$250</td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">May 11</td>
+                            <td class="px-6 py-4 whitespace-nowrap">PHI vs NYK</td>
+                            <td class="px-6 py-4 whitespace-nowrap">NYK +3.5</td>
+                            <td class="px-6 py-4 whitespace-nowrap">+100</td>
+                            <td class="px-6 py-4 whitespace-nowrap">2U ($200)</td>
+                            <td class="px-6 py-4 whitespace-nowrap"><span class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">Loss</span></td>
+                            <td class="px-6 py-4 whitespace-nowrap text-red-600">-$200</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+                <div class="flex justify-between items-center">
+                    <div class="text-sm text-gray-500">Showing 1 to 5 of 127 bets</div>
+                    <div class="flex space-x-2">
+                        <button class="px-3 py-1 bg-gray-200 text-gray-700 rounded-md">Previous</button>
+                        <button class="px-3 py-1 bg-primary text-white rounded-md">Next</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Bet Modal (hidden by default) -->
+        <div id="addBetModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-md">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg font-semibold">Add New Bet</h3>
+                    <button id="closeModal" class="text-gray-400 hover:text-gray-500">
+                        <i data-feather="x"></i>
+                    </button>
+                </div>
+                <div class="p-6">
+                    <form>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-medium mb-2">Date</label>
+                            <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-medium mb-2">Sport</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option>NBA</option>
+                                <option>NFL</option>
+                                <option>MLB</option>
+                                <option>NHL</option>
+                                <option>Soccer</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-medium mb-2">Game/Event</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. LAL vs DEN">
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 text-sm font-medium mb-2">Bet Type</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. DEN -4.5">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-gray-700 text-sm font-medium mb-2">Odds</label>
+                                <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. -110">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 text-sm font-medium mb-2">Units</label>
+                                <input type="number" step="0.5" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. 2">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div>
+                                <label class="block text-gray-700 text-sm font-medium mb-2">Dollar Amount</label>
+                                <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. 200">
+                            </div>
+                            <div>
+                                <label class="block text-gray-700 text-sm font-medium mb-2">Result</label>
+                                <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                                    <option>Pending</option>
+                                    <option>Win</option>
+                                    <option>Loss</option>
+                                    <option>Push</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex justify-end space-x-3">
+                            <button type="button" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</button>
+                            <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600">Save Bet</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize charts
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+            
+            // Monthly Profit/Loss Chart
+            const monthlyCtx = document.getElementById('monthlyChart').getContext('2d');
+            const monthlyChart = new Chart(monthlyCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                    datasets: [{
+                        label: 'Profit/Loss ($)',
+                        data: [420, -180, 310, 790, 525],
+                        backgroundColor: [
+                            '#10B981',
+                            '#EF4444',
+                            '#10B981',
+                            '#10B981',
+                            '#10B981'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+
+            // Sport Performance Chart
+            const sportCtx = document.getElementById('sportChart').getContext('2d');
+            const sportChart = new Chart(sportCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['NBA', 'NFL', 'MLB', 'NHL', 'Soccer'],
+                    datasets: [{
+                        data: [35, 25, 30, 5, 5],
+                        backgroundColor: [
+                            '#3B82F6',
+                            '#EF4444',
+                            '#10B981',
+                            '#6366F1',
+                            '#F59E0B'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+
+            // Modal functionality
+            const modal = document.getElementById('addBetModal');
+            const newBetBtn = document.querySelector('header button:first-child');
+            const closeModal = document.getElementById('closeModal');
+
+            newBetBtn.addEventListener('click', () => {
+                modal.classList.remove('hidden');
+            });
+
+            closeModal.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+
+            // Close modal when clicking outside
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Bet - BetTrack Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6', // blue-500
+                        secondary: '#10B981', // emerald-500
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-2xl">
+        <div class="flex items-center mb-8">
+            <a href="index.html" class="mr-4 text-gray-600 hover:text-primary">
+                <i data-feather="arrow-left"></i>
+            </a>
+            <h1 class="text-2xl font-bold text-primary">Add New Bet</h1>
+        </div>
+
+        <div class="bg-white rounded-lg shadow-md overflow-hidden fade-in">
+            <div class="p-6">
+                <form>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-medium mb-2">Date</label>
+                        <input type="date" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-medium mb-2">Sport</label>
+                        <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                            <option>NBA</option>
+                            <option>NFL</option>
+                            <option>MLB</option>
+                            <option>NHL</option>
+                            <option>Soccer</option>
+                            <option>Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-medium mb-2">Game/Event</label>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. LAL vs DEN">
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-gray-700 text-sm font-medium mb-2">Bet Type</label>
+                        <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. DEN -4.5">
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-medium mb-2">Odds</label>
+                            <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. -110">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-medium mb-2">Units</label>
+                            <input type="number" step="0.5" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. 2">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-medium mb-2">Dollar Amount</label>
+                            <input type="number" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary" placeholder="e.g. 200">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-medium mb-2">Result</label>
+                            <select class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary">
+                                <option>Pending</option>
+                                <option>Win</option>
+                                <option>Loss</option>
+                                <option>Push</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <a href="index.html" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</a>
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded-md hover:bg-blue-600">Save Bet</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+        });
+    </script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics - BetTrack Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6', // blue-500
+                        secondary: '#10B981', // emerald-500
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <div class="flex items-center mb-8">
+            <a href="index.html" class="mr-4 text-gray-600 hover:text-primary">
+                <i data-feather="arrow-left"></i>
+            </a>
+            <h1 class="text-2xl font-bold text-primary">Advanced Analytics</h1>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4">Performance by Odds Range</h3>
+                <canvas id="oddsChart" height="300"></canvas>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4">Profit by Bet Type</h3>
+                <canvas id="betTypeChart" height="300"></canvas>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4">Daily Profit/Loss Trend</h3>
+                <canvas id="dailyTrendChart" height="300"></canvas>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h3 class="text-lg font-semibold mb-4">Unit Size Distribution</h3>
+                <canvas id="unitSizeChart" height="300"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8">
+            <h3 class="text-lg font-semibold mb-4">Performance Metrics</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="p-4 border border-gray-200 rounded-lg">
+                    <h4 class="text-sm font-medium text-gray-500 mb-2">Avg. Winning Odds</h4>
+                    <p class="text-2xl font-bold">+137</p>
+                </div>
+                <div class="p-4 border border-gray-200 rounded-lg">
+                    <h4 class="text-sm font-medium text-gray-500 mb-2">Avg. Losing Odds</h4>
+                    <p class="text-2xl font-bold">-112</p>
+                </div>
+                <div class="p-4 border border-gray-200 rounded-lg">
+                    <h4 class="text-sm font-medium text-gray-500 mb-2">Avg. Bet Size (Units)</h4>
+                    <p class="text-2xl font-bold">1.8</p>
+                </div>
+                <div class="p-4 border border-gray-200 rounded-lg">
+                    <h4 class="text-sm font-medium text-gray-500 mb-2">Longest Winning Streak</h4>
+                    <p class="text-2xl font-bold text-green-500">7</p>
+                </div>
+                <div class="p-4 border border-gray-200 rounded-lg">
+                    <h4 class="text-sm font-medium text-gray-500 mb-2">Longest Losing Streak</h4>
+                    <p class="text-2xl font-bold text-red-500">4</p>
+                </div>
+                <div class="p-4 border border-gray-200 rounded-lg">
+                    <h4 class="text-sm font-medium text-gray-500 mb-2">Best Day ($)</h4>
+                    <p class="text-2xl font-bold text-green-500">+$842</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            feather.replace();
+            
+            // Odds Range Chart
+            const oddsCtx = document.getElementById('oddsChart').getContext('2d');
+            const oddsChart = new Chart(oddsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['+200+', '+150 to +199', '+100 to +149', '-100 to -149', '-150 to -199', '-200+'],
+                    datasets: [{
+                        label: 'Win %',
+                        data: [42, 55, 58, 62, 51, 38],
+                        backgroundColor: '#3B82F6',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                callback: function(value) {
+                                    return value + '%';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Bet Type Chart
+            const betTypeCtx = document.getElementById('betTypeChart').getContext('2d');
+            const betTypeChart = new Chart(betTypeCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Spread', 'Moneyline', 'Total', 'Props', 'Parlays', 'Futures'],
+                    datasets: [{
+                        label: 'Profit ($)',
+                        data: [1200, 850, 740, 320, -180, 50],
+                        backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                        borderColor: '#3B82F6',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#3B82F6',
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: -200,
+                            suggestedMax: 1200
+                        }
+                    }
+                }
+            });
+
+            // Daily Trend Chart
+            const dailyTrendCtx = document.getElementById('dailyTrendChart').getContext('2d');
+            const dailyTrendChart = new Chart(dailyTrendCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 30}, (_, i) => `Day ${i+1}`),
+                    datasets: [{
+                        label: 'Cumulative Profit ($)',
+                        data: Array.from({length: 30}, (_, i) => Math.round(Math.random() * 2000 - 500)),
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderColor: '#10B981',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+
+            // Unit Size Chart
+            const unitSizeCtx = document.getElementById('unitSizeChart').getContext('2d');
+            const unitSizeChart = new Chart(unitSizeCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['0.5U', '1U', '1.5U', '2U', '2.5U', '3U+'],
+                    datasets: [{
+                        data: [15, 35, 25, 15, 5, 5],
+                        backgroundColor: [
+                            '#3B82F6',
+                            '#10B981',
+                            '#F59E0B',
+                            '#EF4444',
+                            '#6366F1',
+                            '#8B5CF6'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
